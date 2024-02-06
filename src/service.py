@@ -80,8 +80,8 @@ class ProcessingService:
             response_content = chat_completion.choices[0].message.content
             response_content = response_content.rstrip(".")
             return response_content
-        except RateLimitError as re:
-            logger.error(f"Rate limit error: {re}")
+        except RetryError as re:
+            logger.error(f"Retry error: {re}")
             raise re
         except Exception as e:
             logger.error(f"Error while processing {str(lines)}: {str(e)}")
