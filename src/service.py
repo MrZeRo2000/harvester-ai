@@ -4,10 +4,11 @@ from logger import get_logger
 from tenacity import (
     retry,
     stop_after_attempt,
-    wait_random_exponential, retry_if_not_exception_type,
-)  # for exponential backoff
+    wait_random_exponential,
+)
 from repository import get_connection, SnapshotRepository
 
+# noinspection PyPep8
 OPENAI_REQUEST = 'Write a concise summary for diverse entries, eliminating duplicates, URLs, and emojis, ensuring clarity and coherence within 170 characters without generating new entries'
 
 logger = get_logger(__name__)
