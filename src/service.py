@@ -4,7 +4,7 @@ from logger import get_logger
 from tenacity import (
     retry,
     stop_after_attempt,
-    wait_random_exponential,
+    wait_random_exponential, RetryError,
 )
 from repository import get_connection, SnapshotRepository
 
@@ -48,8 +48,8 @@ class ProcessingService:
                 logger.info(f"Requesting for {ls}")
                 try:
                     openai_response = self.get_openai_response(ls)
-                except RateLimitError:
-                    logger.error("Rate Limit error, exiting")
+                except RetryError:
+                    logger.error("Retry error, exiting")
                     return result
                 logger.info(f"Response: {openai_response}")
 
