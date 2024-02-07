@@ -41,22 +41,27 @@ class ProcessingService:
         result = {}
 
         df_descriptions = df_snapshot.groupby("ticket_number").agg({'description': lambda s: list(set(s))})
+        df_descriptions_to_process = df_descriptions[df_descriptions['description'].str.len() > 1]
+        logger.info(
+            f"Total number of items: {len(df_descriptions)}, items to process: {len(df_descriptions_to_process)}")
 
-        for row in df_descriptions.itertuples():
+        for row in df_descriptions_to_process.itertuples():
             ls = row[1]
-            if len(ls) > 1:
-                logger.info(f"Requesting for {ls}")
-                try:
-                    openai_response = self.get_openai_response(ls)
-                except RetryError:
-                    logger.error("Retry error, exiting")
-                    return result
+
+            logger.info(f"Requesting for {ls}")
+            try:
+                openai_response = self.get_openai_response(ls)
                 logger.info(f"Response: {openai_response}")
 
                 if len(openai_response) > 0:
                     result[row[0]] = openai_response
                     # return result
 
+            except RateLimitError as re:
+                logger.error(f"Rate limit error: {re}, exiting with obtained result")
+                return result
+            except Exception as e:
+                logger.error(f"Unexpected error: {e}, continue with other items")
         return result
 
     @retry(
@@ -81,8 +86,8 @@ class ProcessingService:
             response_content = response_content.rstrip(".")
             return response_content
         except RetryError as re:
-            logger.error(f"Retry error: {re}")
-            raise re
+            logger.error(f"Retry error: {re}, cause: {str(re.__cause__)}")
+            re.reraise()
         except Exception as e:
             logger.error(f"Error while processing {str(lines)}: {str(e)}")
             return ""

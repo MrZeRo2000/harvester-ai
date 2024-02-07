@@ -94,7 +94,7 @@ class SnapshotRepository:
                     row.customer_id,
                     row.project,
                     row.subproject,
-                    ticket_description
+                    f"{row.ticket_number}:{ticket_description}"
                 )
 
                 changes.append(
