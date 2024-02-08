@@ -13,9 +13,6 @@ create table IF NOT EXISTS public.snapshot_changes_ai
     update_date       timestamp with time zone
 );
 
-alter table public.snapshot_changes_ai
-    owner to r1525;
-
 create unique index snapshot_changes_ai_log_id_uindex
     on public.snapshot_changes_ai (log_id);
 
